@@ -1,0 +1,24 @@
+namespace NRG3.Bliss.API.ServiceManagement.Interfaces.REST.Resources;
+
+/**
+ * Represents a company resource.
+ * <param name="Name">
+ * The name of the company.
+ * </param>
+ * <param name="Ruc">
+ * The RUC of the company.
+ * </param>
+ * <param name="Email">
+ * The email of the company.
+ * </param>
+ * <param name="WebsiteUrl">
+ * The website URL of the company.
+ * </param>
+ * <param name="PhoneNumber">
+ * The phone number of the company.
+ * </param>
+ * <param name="Description">
+ * The description of the company.
+ * </param>
+ */
+public record CreateCompanyResource(string Name, string Ruc, string Email, string WebsiteUrl, string PhoneNumber, string Description);
