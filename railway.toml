@@ -1,0 +1,7 @@
+﻿[build]
+builder = "dockerfile"
+dockerfilePath = "./NRG3.Bliss.API/Dockerfile"
+
+[deploy]
+startCommand = "dotnet NRG3.Bliss.API.dll"
+restartPolicyType = "always"

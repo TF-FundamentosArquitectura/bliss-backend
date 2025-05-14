@@ -1,0 +1,94 @@
+## Ignorar archivos generados por el IDE ##
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.ide/
+.idea/
+.vs/
+*.iml
+*.ncrunchproject
+*.dotCover
+*.resharper
+/_ReSharper.Caches/
+*.vspscc
+*.vssscc
+
+## Ignorar resultados de compilación ##
+bin/
+obj/
+/packages/
+[Bb]in/
+[Oo]bj/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.dotCover
+
+## Ignorar archivos de usuario ##
+*.userprefs
+*.usertasks
+*.log
+*.bak
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+*.ilk
+*.msi
+*.res
+
+## Ignorar archivos de pruebas ##
+TestResults/
+*.testlog
+*.trx
+
+## Ignorar paquetes NuGet ##
+[Nn]u[Pp]ackages/
+*.nupkg
+packages/
+.nuget/
+NuGet.exe
+
+## Ignorar archivos de publicación ##
+publish/
+*.pubxml
+*.publishproj
+
+## Ignorar archivos temporales ##
+*.tmp
+*.temp
+*.TMP
+*.TEMP
+~$*
+
+## Ignorar archivos de desarrollo local ##
+appsettings.Development.json
+launchSettings.json
+secrets.json
+*.Development.*
+
+## Ignorar archivos de Docker ##
+docker-compose.override.yml
+.dockerignore
+
+## Ignorar archivos de frontend (por si acaso) ##
+node_modules/
+bower_components/
+*.css
+*.min.js
+*.min.css
+*.sass.map
+*.js.map
+
+## Ignorar archivos de editor ##
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+## Ignorar archivos de sistema ##
+.DS_Store
+Thumbs.db

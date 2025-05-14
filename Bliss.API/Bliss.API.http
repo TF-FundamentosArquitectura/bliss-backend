@@ -1,0 +1,6 @@
+@NRG3.Bliss.API_HostAddress = http://localhost:5296
+
+GET {{NRG3.Bliss.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
