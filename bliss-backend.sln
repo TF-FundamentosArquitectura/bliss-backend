@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # 
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRG3.Bliss.API", "NRG3.Bliss.API\NRG3.Bliss.API.csproj", "{1E257A0F-A01B-47D7-A4F2-41500E4DB888}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliss.API", "Bliss.API\Bliss.API.csproj", "{1E257A0F-A01B-47D7-A4F2-41500E4DB888}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NRG3.Bliss.API.Tests", "NRG3.Bliss.API.Tests\NRG3.Bliss.API.Tests.csproj", "{EB620997-A354-4598-A584-DF48D41D4153}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliss.API.Tests", "Bliss.API.Tests\Bliss.API.Tests.csproj", "{EB620997-A354-4598-A584-DF48D41D4153}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
