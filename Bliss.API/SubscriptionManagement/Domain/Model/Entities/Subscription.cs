@@ -1,21 +1,20 @@
 ﻿// Domain/Model/Entities/Subscription.cs
 namespace Bliss.API.SubscriptionManagement.Domain.Model.Entities
-
 {
     public class Subscription
     {
-        public int Id { get; private set; }
-        public int SubscriptionPlanId { get; private set; }
-        public int UserId { get; private set; }
-        public DateTime StartDate { get; private set; }
-        public DateTime EndDate { get; private set; }
-        public string Status { get; private set; }
-        public string PaymentMethod { get; private set; }
+        public int Id { get; set; }
+        public int SubscriptionPlanId { get; set; }
+        public int UserId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Status { get; set; }
+        public string PaymentMethod { get; set; }
 
-        // Navigation properties
-        public SubscriptionPlan SubscriptionPlan { get; private set; }
+        // Relación con SubscriptionPlan
+        public SubscriptionPlan SubscriptionPlan { get; set; }
 
-        // Constructor
+        // Constructor con parámetros
         public Subscription(int subscriptionPlanId, int userId, DateTime startDate, DateTime endDate, string status, string paymentMethod)
         {
             SubscriptionPlanId = subscriptionPlanId;
@@ -26,15 +25,9 @@ namespace Bliss.API.SubscriptionManagement.Domain.Model.Entities
             PaymentMethod = paymentMethod;
         }
 
-        // Métodos de dominio, por ejemplo para activar una suscripción
-        public void Activate()
+        // Constructor vacío (si es necesario)
+        public Subscription()
         {
-            Status = "Active";
-        }
-
-        public void Deactivate()
-        {
-            Status = "Inactive";
         }
     }
 }

@@ -1,17 +1,12 @@
 ﻿// Application/Internal/CommandServices/ISubscriptionCommandService.cs
-using Bliss.API.SubscriptionManagement.Application.Internal.CommandServices.Commands;
+using Bliss.API.SubscriptionManagement.Domain.Model.Entities;
 
 namespace Bliss.API.SubscriptionManagement.Application.Internal.CommandServices
 {
     public interface ISubscriptionCommandService
     {
-        // Crear una nueva suscripción
-        Task CreateSubscriptionAsync(CreateSubscriptionCommand command);
-
-        // Actualizar una suscripción existente
-        Task UpdateSubscriptionAsync(UpdateSubscriptionCommand command);
-
-        // Eliminar una suscripción
+        Task CreateSubscriptionAsync(Subscription subscription);
+        Task UpdateSubscriptionAsync(Subscription subscription);
         Task DeleteSubscriptionAsync(int subscriptionId);
     }
 }

@@ -1,4 +1,8 @@
 using System.Text;
+using Bliss.API.SubscriptionManagement.Application.Internal.CommandServices;
+using Bliss.API.SubscriptionManagement.Application.Internal.QueryServices;
+using Bliss.API.SubscriptionManagement.Domain.Repositories;
+using Bliss.API.SubscriptionManagement.Infrastructure.Persistence.EFC.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -32,25 +36,23 @@ using NRG3.Bliss.API.Shared.Infrastructure.Interfaces.ASP.Configuration;
 using NRG3.Bliss.API.Shared.Infrastructure.Persistence.EFC.Configuration;
 using NRG3.Bliss.API.Shared.Infrastructure.Persistence.EFC.Repositories;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración de servicios (incluso para CORS, bases de datos, etc.)
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()));
 
-// Add CORS Policy
+// Configurar CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllPolicy",
-        policy => 
-            policy.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+    options.AddPolicy("AllowAllPolicy", policy =>
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 });
 
-// Add Database Connection
+// Configurar base de datos (MySQL)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 if (connectionString is null)
     throw new Exception("Connection string is null.");
 
@@ -65,9 +67,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseMySQL(connectionString);
 });
 
+// Registra los repositorios con DI
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+// Registra los servicios y controladores
+builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
+builder.Services.AddScoped<ISubscriptionQueryService, SubscriptionQueryService>();
 
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1",
@@ -129,7 +141,7 @@ builder.Services.AddScoped<IReviewQueryService, ReviewQueryService>();
 
 var app = builder.Build();
 
-// Verify Database Objects are Created
+// Verificar si la base de datos existe y crearla si es necesario
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -137,20 +149,15 @@ using (var scope = app.Services.CreateScope())
     context.Database.EnsureCreated();
 }
 
-// Configure the HTTP request pipeline.
+// Configurar el pipeline de HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    
 }
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
 app.UseCors("AllowAllPolicy");
-
 app.UseHttpsRedirection();
-
 app.MapControllers();
-
 app.Run();

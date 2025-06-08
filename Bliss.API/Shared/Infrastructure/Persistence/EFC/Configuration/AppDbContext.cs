@@ -1,3 +1,4 @@
+using Bliss.API.SubscriptionManagement.Domain.Model.Entities;
 using EntityFrameworkCore.CreatedUpdatedDate.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NRG3.Bliss.API.AppointmentManagement.Domain.Model.Aggregates;
@@ -6,10 +7,13 @@ using NRG3.Bliss.API.ReviewManagement.Domain.Model.Aggregates;
 using NRG3.Bliss.API.ServiceManagement.Domain.Model.Aggregates;
 using NRG3.Bliss.API.ServiceManagement.Domain.Model.Entities;
 using NRG3.Bliss.API.Shared.Infrastructure.Persistence.EFC.Configuration.Extensions;
+
 namespace NRG3.Bliss.API.Shared.Infrastructure.Persistence.EFC.Configuration;
 
 public class AppDbContext(DbContextOptions options) : DbContext(options)
 {
+    public DbSet<Subscription> Subscriptions { get; set; }
+    public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Service> Services { get; set; }
@@ -66,7 +70,14 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.Entity<User>().Property(u => u.City).IsRequired();
         builder.Entity<User>().Property(u => u.BirthDate).IsRequired();
         
-        
+        builder.Entity<Subscription>().HasKey(s => s.Id);
+        builder.Entity<Subscription>().Property(s => s.Id).IsRequired().ValueGeneratedOnAdd();
+        builder.Entity<Subscription>().Property(s => s.UserId).IsRequired();
+        builder.Entity<Subscription>().Property(s => s.SubscriptionPlanId).IsRequired();  // La clave foránea
+        builder.Entity<Subscription>().Property(s => s.StartDate).IsRequired();
+        builder.Entity<Subscription>().Property(s => s.EndDate).IsRequired();
+        builder.Entity<Subscription>().Property(s => s.Status).IsRequired().HasMaxLength(50);
+        builder.Entity<Subscription>().Property(s => s.PaymentMethod).HasMaxLength(100);
         
         builder.Entity<Category>()
             .HasMany(c => c.Services)
@@ -110,6 +121,19 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.Entity<Review>()
             .HasIndex(r => r.AppointmentId)
             .IsUnique();
+        
+        builder.Entity<Subscription>()
+            .HasOne(s => s.SubscriptionPlan)  
+            .WithMany(sp => sp.Subscriptions) 
+            .HasForeignKey(s => s.SubscriptionPlanId)  
+            .OnDelete(DeleteBehavior.Restrict);  
+
+        builder.Entity<SubscriptionPlan>().HasKey(sp => sp.Id);
+        builder.Entity<SubscriptionPlan>().Property(sp => sp.Id).IsRequired().ValueGeneratedOnAdd();
+        builder.Entity<SubscriptionPlan>().Property(sp => sp.Name).IsRequired().HasMaxLength(100);
+        builder.Entity<SubscriptionPlan>().Property(sp => sp.Description).HasMaxLength(500);
+        builder.Entity<SubscriptionPlan>().Property(sp => sp.Price).IsRequired();
+        builder.Entity<SubscriptionPlan>().Property(sp => sp.DurationDays).IsRequired();
         
         builder.UseSnakeCaseNamingConvention();
     }
