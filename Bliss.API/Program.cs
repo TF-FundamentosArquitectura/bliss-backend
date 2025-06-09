@@ -1,4 +1,9 @@
 using System.Text;
+using Bliss.API.Promotions.Application.Internal.CommandServices;
+using Bliss.API.Promotions.Application.Internal.QueryServices;
+using Bliss.API.Promotions.Domain.Model.Repositories;
+using Bliss.API.Promotions.Domain.Services;
+using Bliss.API.Promotions.Infrastructure.Repositories;
 using Bliss.API.SubscriptionManagement.Application.Internal.CommandServices;
 using Bliss.API.SubscriptionManagement.Application.Internal.QueryServices;
 using Bliss.API.SubscriptionManagement.Domain.Repositories;
@@ -91,13 +96,13 @@ builder.Services.AddSwaggerGen(options =>
             TermsOfService = new Uri("https://nrg3-appweb.github.io/Landing-Page/"),
             Contact = new OpenApiContact
             {
-                Name   = "NRG3",
+                Name = "NRG3",
                 Email = "contact@nrg3.com"
             },
             License = new OpenApiLicense
             {
                 Name = "Apache 2.0",
-                Url  = new Uri("https://www.apache.org/licenses/LICENSE-2.0.html")
+                Url = new Uri("https://www.apache.org/licenses/LICENSE-2.0.html")
             }
         });
     options.EnableAnnotations();
@@ -138,6 +143,11 @@ builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewCommandService, ReviewCommandService>();
 builder.Services.AddScoped<IReviewQueryService, ReviewQueryService>();
+
+// Promotion BC
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IPromotionCommandService, PromotionCommandService>();
+builder.Services.AddScoped<IPromotionQueryService, PromotionQueryService>();
 
 var app = builder.Build();
 
