@@ -1,4 +1,5 @@
 ﻿using System.Net.Mime;
+using Bliss.API.AppointmentManagement.Domain.Model.Commands;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using NRG3.Bliss.API.AppointmentManagement.Domain.Model.Commands;
@@ -28,7 +29,7 @@ public class AppointmentsController(
     IAppointmentQueryService appointmentQueryService
     ) : ControllerBase
 {
-    
+
     /// <summary>
     /// Get appointments by id
     /// </summary>
@@ -53,7 +54,7 @@ public class AppointmentsController(
         var appointmentResource = AppointmentResourceFromEntityAssembler.ToResourceFromEntity(appointment);
         return Ok(appointmentResource);
     }
-    
+
     //TODO: Refactor function and controller location in order to match the following endpoint (api/v1/users/{userId:int}/appointments) (Astonitas)
     /// <summary>
     /// Get appointments by user id
@@ -65,7 +66,7 @@ public class AppointmentsController(
     /// The <see cref="AppointmentResource"/> resources for the given user id
     /// </returns>
     [HttpGet("user/{userId:int}")]
-    [SwaggerOperation (
+    [SwaggerOperation(
         Summary = "Get appointments by user id",
         Description = "Get the appointments a user has",
         OperationId = "GetAppointmentsByUserId")]
@@ -80,7 +81,7 @@ public class AppointmentsController(
             );
         return Ok(appointmentResources);
     }
-    
+
     /// <summary>
     /// Create a new appointment
     /// </summary>
@@ -105,7 +106,7 @@ public class AppointmentsController(
         var appointmentResource = AppointmentResourceFromEntityAssembler.ToResourceFromEntity(appointment);
         return CreatedAtAction(nameof(GetAppointmentById), new { appointmentId = appointment.Id }, appointmentResource);
     }
-    
+
     /// <summary>
     /// Delete an appointment by id
     /// </summary>
@@ -128,5 +129,19 @@ public class AppointmentsController(
         await appointmentCommandService.Handle(deleteAppointmentCommand);
         return Ok("The appointment given id successfully deleted");
     }
-    
+
+    [HttpPost("{appointmentId:int}")]
+    [SwaggerOperation(
+        Summary = "Complete an appointment by id",
+        Description = "Complete an appointment in a system by its id",
+        OperationId = "CompleteAppointmentById")]
+    [SwaggerResponse(StatusCodes.Status200OK, "The appointment was completed", typeof(AppointmentResource))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "The appointment was not found.")]
+    public async Task<IActionResult> CompleteAppointmentById([FromRoute] int appointmentId)
+    {
+        var deleteAppointmentCommand = new CompleteAppoinmentCommand(appointmentId);
+        await appointmentCommandService.Handle(deleteAppointmentCommand);
+        return Ok("The appointment given id successfully completed");
+    }
+
 }

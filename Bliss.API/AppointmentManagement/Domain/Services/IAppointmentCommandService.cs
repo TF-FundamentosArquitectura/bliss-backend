@@ -1,4 +1,6 @@
-﻿using NRG3.Bliss.API.AppointmentManagement.Domain.Model.Aggregates;
+﻿using System.Runtime.CompilerServices;
+using Bliss.API.AppointmentManagement.Domain.Model.Commands;
+using NRG3.Bliss.API.AppointmentManagement.Domain.Model.Aggregates;
 using NRG3.Bliss.API.AppointmentManagement.Domain.Model.Commands;
 
 namespace NRG3.Bliss.API.AppointmentManagement.Domain.Services;
@@ -18,7 +20,8 @@ public interface IAppointmentCommandService
     /// The <see cref="Appointment"/> object with the created appointment
     /// </returns>
     Task<Appointment?> Handle(CreateAppointmentCommand command);
-    
+    Task Handle(CompleteAppoinmentCommand command);
+
     /// <summary>
     /// Handle delete appointment command
     /// </summary>
