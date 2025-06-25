@@ -31,4 +31,6 @@ public interface IServiceCommandService
      * <param name="command">The delete service command</param>
      */
     Task Handle(DeleteServiceCommand command);
+
+    Task<string[]> getSpecialist(int serviceId);
 }

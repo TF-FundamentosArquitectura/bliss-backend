@@ -24,20 +24,21 @@ public partial class User
     public string Address { get; private set; }
     public string City { get; private set; }
     public DateTime BirthDate { get; private set; }
-    
+    public string Role { get; private set; }
     public ICollection<Appointment> Appointments { get; }
-    
+
     public ICollection<Review> Reviews { get; private set; } = new List<Review>();
 
-    
-    public User( string firstName, 
-        string lastName, 
-        string passwordHash, 
-        string email, 
-        string phone, 
-        string dni, 
-        string address, 
-        string city, 
+
+
+    public User(string firstName,
+        string lastName,
+        string passwordHash,
+        string email,
+        string phone,
+        string dni,
+        string address,
+        string city,
         DateTime birthDate)
     {
         FirstName = firstName;
@@ -50,7 +51,7 @@ public partial class User
         City = city;
         BirthDate = birthDate;
     }
-    
+
     public User(SignUpCommand command, string hashedPasswordHash)
     {
         FirstName = command.FirstName;
@@ -62,6 +63,7 @@ public partial class User
         Address = command.Address;
         City = command.City;
         BirthDate = command.BirthDate;
+        Role = command.Role;
     }
-    
+
 }

@@ -10,5 +10,6 @@ public record SignUpCommand(
     string Dni,
     string Address,
     string City,
-    DateTime BirthDate
+    DateTime BirthDate,
+    string Role
     );

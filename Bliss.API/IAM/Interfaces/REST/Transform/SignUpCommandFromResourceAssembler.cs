@@ -8,15 +8,16 @@ public class SignUpCommandFromResourceAssembler
     public static SignUpCommand ToCommandFromResource(SignUpResource resource)
     {
         return new SignUpCommand(
-            resource.FirstName,
-            resource.LastName,
+            resource.FirstName!,
+            resource.LastName!,
             resource.Password,
             resource.Email,
-            resource.Phone,
-            resource.Dni,
-            resource.Address,
-            resource.City,
-            resource.BirthDate
-            );
+            resource.Phone!,
+            resource.Dni!,
+            resource.Address!,
+            resource.City!,
+            resource.BirthDate ?? DateTime.UtcNow, // aseguramos valor no nulo
+            resource.Role
+        );
     }
 }

@@ -29,4 +29,4 @@ namespace NRG3.Bliss.API.ServiceManagement.Interfaces.REST.Resources;
  * The image URL of the service.
  * </param>
  */
-public record ServiceResource(int Id, SimplifiedCompanyResource Company, ServiceCategoryResource Category, string Name, string Description, double Price, double Duration,string ImgUrl);
+public record ServiceResource(int Id, SimplifiedCompanyResource Company, ServiceCategoryResource Category, string Name, string Description, double Price, double Duration, string ImgUrl, string[] Specialist);

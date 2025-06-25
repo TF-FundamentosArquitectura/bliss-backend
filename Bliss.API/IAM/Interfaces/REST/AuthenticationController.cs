@@ -1,9 +1,12 @@
 ﻿using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
+using NRG3.Bliss.API.IAM.Domain.Model.Commands;
 using NRG3.Bliss.API.IAM.Domain.Services;
 using NRG3.Bliss.API.IAM.Infrastructure.Pipeline.Middleware.Attributes;
 using NRG3.Bliss.API.IAM.Interfaces.REST.Resources;
 using NRG3.Bliss.API.IAM.Interfaces.REST.Transform;
+using NRG3.Bliss.API.ServiceManagement.Domain.Model.Commands;
+using NRG3.Bliss.API.ServiceManagement.Domain.Services;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace NRG3.Bliss.API.IAM.Interfaces.REST;
@@ -23,7 +26,7 @@ namespace NRG3.Bliss.API.IAM.Interfaces.REST;
 [Route("/api/v1/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
 [SwaggerTag("Available Authentication endpoints")]
-public class AuthenticationController(IUserCommandService userCommandService) : ControllerBase
+public class AuthenticationController(IUserCommandService userCommandService, ICompanyCommandService companyCommandService) : ControllerBase
 {
     /// <summary>
     /// Sign in 
@@ -46,6 +49,7 @@ public class AuthenticationController(IUserCommandService userCommandService) : 
     [SwaggerResponse(StatusCodes.Status200OK, "Authenticated user", typeof(AuthenticatedUserResource))]
     public async Task<IActionResult> SignIn([FromBody] SignInResource resource)
     {
+
         var signInCommand = SignInCommandFromResourceAssembler.ToCommandFromResource(resource);
         var authenticatedUser = await userCommandService.Handle(signInCommand);
         var authenticatedUserResource = AuthenticatedUserResourceFromEntityAssembler
@@ -64,17 +68,69 @@ public class AuthenticationController(IUserCommandService userCommandService) : 
     /// <returns>
     /// A message indicating that the user was created successfully.
     /// </returns>
+
     [AllowAnonymous]
     [HttpPost("sign-up")]
     [SwaggerOperation(
-        Summary = "Sign up",
-        Description = "Sign up to the platform",
-        OperationId = "SignUp")]
+    Summary = "Sign up",
+    Description = "Sign up to the platform",
+    OperationId = "SignUp")]
     [SwaggerResponse(StatusCodes.Status200OK, "User created successfully")]
     public async Task<IActionResult> SignUp([FromBody] SignUpResource resource)
     {
-        var signUpCommand = SignUpCommandFromResourceAssembler.ToCommandFromResource(resource);
-        await userCommandService.Handle(signUpCommand);
+        if (resource.Role.ToLower() == "client")
+        {
+            var signUpCommand = new SignUpCommand(
+                resource.FirstName!,
+                resource.LastName!,
+                resource.Password,
+                resource.Email,
+                resource.Phone!,
+                resource.Dni!,
+                resource.Address!,
+                resource.City!,
+                resource.BirthDate ?? DateTime.UtcNow,
+                resource.Role
+            );
+
+            await userCommandService.Handle(signUpCommand);
+        }
+        else if (resource.Role.ToLower() == "bussiness")
+        {
+            // Primero, crear el usuario (genérico)
+            var signUpCommand = new SignUpCommand(
+                "Business",            // FirstName
+                "Account",             // LastName
+                resource.Password,
+                resource.Email,
+                "000000000",           // Phone (dummy)
+                "00000000",            // Dni (dummy)
+                "N/A",                 // Address
+                "N/A",                 // City
+                DateTime.UtcNow,       // BirthDate
+                resource.Role
+            );
+
+            await userCommandService.Handle(signUpCommand);
+
+            // Luego, crear la empresa con los datos reales
+            var createCompanyCommand = new CreateCompanyCommand(
+                resource.Name!,
+                resource.Ruc!,
+                resource.Email,
+                resource.WebsiteUrl!,
+                resource.PhoneNumber!,
+                resource.Description!
+            );
+
+            await companyCommandService.Handle(createCompanyCommand);
+        }
+        else
+        {
+            return BadRequest(new { message = "Invalid role. Accepted values are 'Client' or 'Bussiness'." });
+        }
+
         return Ok(new { message = "User created successfully" });
     }
+
 }

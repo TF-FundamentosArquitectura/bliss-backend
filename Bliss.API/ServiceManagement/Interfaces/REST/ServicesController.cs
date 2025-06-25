@@ -28,7 +28,7 @@ public class ServicesController(
     IServiceQueryService serviceQueryService
     ) : ControllerBase
 {
-    
+
     /**
      * Get service by id
      * <param name="serviceId">
@@ -39,7 +39,7 @@ public class ServicesController(
      * </returns>
      */
     [HttpGet("{serviceId:int}")]
-    [SwaggerOperation (
+    [SwaggerOperation(
         Summary = "Get service by id",
         Description = "Get a service by its id",
         OperationId = "GetServiceById")]
@@ -49,10 +49,11 @@ public class ServicesController(
         var getServiceByIdQuery = new GetServiceByIdQuery(serviceId);
         var service = await serviceQueryService.Handle(getServiceByIdQuery);
         if (service is null) return NotFound();
-        var serviceResource = ServiceResourceFromEntityAssembler.ToResourceFromEntity(service);
+        var specialists = await serviceCommandService.getSpecialist(serviceId);
+        var serviceResource = ServiceResourceFromEntityAssembler.ToResourceFromEntity(service, specialists);
         return Ok(serviceResource);
     }
-    
+
     /**
      * Get all services
      * <returns>
@@ -69,12 +70,23 @@ public class ServicesController(
     {
         var getAllServicesQuery = new GetAllServicesQuery();
         var services = await serviceQueryService.Handle(getAllServicesQuery);
-        var serviceResources = services.Select(
-            ServiceResourceFromEntityAssembler.ToResourceFromEntity
-        );
+
+        if (services is null || !services.Any())
+            return NotFound();
+
+        var serviceResources = new List<ServiceResource>();
+
+        foreach (var service in services)
+        {
+            var specialists = await serviceCommandService.getSpecialist(service.Id);
+            var resource = ServiceResourceFromEntityAssembler.ToResourceFromEntity(service, specialists);
+            serviceResources.Add(resource);
+        }
+
         return Ok(serviceResources);
     }
-    
+
+
     /**
      * Create a new service
      * <param name="resource">
@@ -96,10 +108,11 @@ public class ServicesController(
         var createServiceCommand = CreateServiceCommandResourceFromEntityAssembler.ToCommandFromResource(resource);
         var service = await serviceCommandService.Handle(createServiceCommand);
         if (service is null) return BadRequest("The service could not be created");
-        var serviceResource = ServiceResourceFromEntityAssembler.ToResourceFromEntity(service);
+        var specialists = await serviceCommandService.getSpecialist(service.Id);
+        var serviceResource = ServiceResourceFromEntityAssembler.ToResourceFromEntity(service, specialists);
         return CreatedAtAction(nameof(GetServiceById), new { serviceId = service.Id }, serviceResource);
     }
-    
+
     /**
      * Update a service
      * <param name="resource">
@@ -119,15 +132,16 @@ public class ServicesController(
         OperationId = "UpdateService")]
     [SwaggerResponse(StatusCodes.Status200OK, "The service was updated", typeof(ServiceResource))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "The request is invalid")]
-    public async Task<IActionResult> UpdateService([FromBody] UpdateServiceResource resource,[FromRoute] int serviceId)
+    public async Task<IActionResult> UpdateService([FromBody] UpdateServiceResource resource, [FromRoute] int serviceId)
     {
         var updateServiceCommand = UpdateServiceCommandResourceFromEntityAssembler.ToCommandFromResource(resource, serviceId);
         var service = await serviceCommandService.Handle(updateServiceCommand);
         if (service is null) return BadRequest();
-        var serviceResource = ServiceResourceFromEntityAssembler.ToResourceFromEntity(service);
+        var specialists = await serviceCommandService.getSpecialist(service.Id);
+        var serviceResource = ServiceResourceFromEntityAssembler.ToResourceFromEntity(service, specialists);
         return Ok(serviceResource);
     }
-    
+
     /**
      * Delete a service
      * <param name="serviceId">

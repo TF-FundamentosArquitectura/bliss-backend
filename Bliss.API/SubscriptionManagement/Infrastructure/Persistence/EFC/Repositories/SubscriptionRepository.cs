@@ -1,15 +1,17 @@
 ﻿// Infrastructure/Persistence/EFC/Repositories/SubscriptionRepository.cs
-using Bliss.API.SubscriptionManagement.Domain.Model.Entities;
+using Bliss.API.Infrastructure.Data;  // Cambiar la importación de ApplicationDbContext a AppDbContext
+using Bliss.API.SubscriptionManagement.Domain.Model.Entities;  // Asegúrate de importar la entidad Subscription
 using Bliss.API.SubscriptionManagement.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using NRG3.Bliss.API.Shared.Infrastructure.Persistence.EFC.Configuration;
 
 namespace Bliss.API.SubscriptionManagement.Infrastructure.Persistence.EFC.Repositories
 {
     public class SubscriptionRepository : ISubscriptionRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly AppDbContext _context;  // Cambiar a AppDbContext
 
-        public SubscriptionRepository(ApplicationDbContext context)
+        public SubscriptionRepository(AppDbContext context)  // Cambiar aquí también
         {
             _context = context;
         }

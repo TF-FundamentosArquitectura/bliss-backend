@@ -10,9 +10,19 @@ public class ServiceCommandService(
     IServiceRepository serviceRepository,
     ICategoryRepository categoryRepository,
     ICompanyRepository companyRepository,
+    ISpecialistRepository specialistRepository,
     IUnitOfWork unitOfWork)
-    :IServiceCommandService
+    : IServiceCommandService
 {
+    public async Task<string[]> getSpecialist(int serviceId)
+    {
+        var specialists = await specialistRepository.FindByServiceIdAsync(serviceId);
+
+        return specialists == null
+            ? Array.Empty<string>()
+            : specialists;
+    }
+
     /// <inheritdoc />
     public async Task<Service?> Handle(CreateServiceCommand command)
     {
@@ -26,15 +36,22 @@ public class ServiceCommandService(
         await unitOfWork.CompleteAsync();
         var category = await categoryRepository.FindByIdAsync(command.CategoryId);
         var company = await companyRepository.FindByIdAsync(command.CompanyId);
-        
+
         if (category == null) throw new InvalidOperationException("The category selected doesnt exists");
         if (company == null) throw new InvalidOperationException("The company selected doesnt exists");
-            
+
         service.Category = category;
         service.Company = company;
+
+        foreach (var s in command.Specialists)
+        {
+            var specialist = new Specialist(service.Id, s);
+            await specialistRepository.AddAsync(specialist);
+        }
+        await unitOfWork.CompleteAsync();
+
         return service;
     }
-
     /// <inheritdoc />
     public async Task<Service?> Handle(UpdateServiceCommand command)
     {
@@ -52,7 +69,7 @@ public class ServiceCommandService(
     public async Task Handle(DeleteServiceCommand command)
     {
         var service = await serviceRepository.FindServiceById(command.ServiceId);
-        if(service != null)
+        if (service != null)
         {
             serviceRepository.Remove(service);
             await unitOfWork.CompleteAsync();

@@ -17,7 +17,7 @@ namespace NRG3.Bliss.API.ServiceManagement.Interfaces.REST;
 [Produces(MediaTypeNames.Application.Json)]
 [Tags("Services")]
 
-public class CompanyServicesController(IServiceQueryService serviceQueryService) : ControllerBase
+public class CompanyServicesController(IServiceQueryService serviceQueryService, IServiceCommandService serviceCommandService) : ControllerBase
 {
     /**
      * Get all services by company id
@@ -38,7 +38,20 @@ public class CompanyServicesController(IServiceQueryService serviceQueryService)
     {
         var getAllServicesByCompanyIdQuery = new GetAllServicesByCompanyIdQuery(companyId);
         var services = await serviceQueryService.Handle(getAllServicesByCompanyIdQuery);
-        var serviceResources = services.Select(ServiceResourceFromEntityAssembler.ToResourceFromEntity);
+
+        if (services is null || !services.Any())
+            return NotFound();
+
+        var serviceResources = new List<ServiceResource>();
+
+        foreach (var service in services)
+        {
+            var specialists = await serviceCommandService.getSpecialist(service.Id);
+            var resource = ServiceResourceFromEntityAssembler.ToResourceFromEntity(service, specialists);
+            serviceResources.Add(resource);
+        }
+
         return Ok(serviceResources);
     }
+
 }

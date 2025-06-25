@@ -18,17 +18,18 @@ public static class ServiceResourceFromEntityAssembler
      * The <see cref="ServiceResource"/> resource assembled from the entity
      * </returns>
      */
-    public static ServiceResource ToResourceFromEntity(Service entity)
+    public static ServiceResource ToResourceFromEntity(Service entity, string[] specialist)
     {
         return new ServiceResource(
-            entity.Id, 
-            SimplifiedCompanyResourceFromEntityAssembler.ToResourceFromEntity(entity.Company), 
+            entity.Id,
+            SimplifiedCompanyResourceFromEntityAssembler.ToResourceFromEntity(entity.Company),
             ServiceCategoryResourceFromEntityAssembler.ToResourceFromEntity(entity.Category),
             entity.Name,
             entity.Description,
             entity.Price,
             entity.Duration,
-            entity.ImageUrl
+            entity.ImageUrl,
+            specialist
         );
     }
 }

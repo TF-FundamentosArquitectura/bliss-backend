@@ -1,4 +1,13 @@
 using System.Text;
+using Bliss.API.Promotions.Application.Internal.CommandServices;
+using Bliss.API.Promotions.Application.Internal.QueryServices;
+using Bliss.API.Promotions.Domain.Model.Repositories;
+using Bliss.API.Promotions.Domain.Services;
+using Bliss.API.Promotions.Infrastructure.Repositories;
+using Bliss.API.SubscriptionManagement.Application.Internal.CommandServices;
+using Bliss.API.SubscriptionManagement.Application.Internal.QueryServices;
+using Bliss.API.SubscriptionManagement.Domain.Repositories;
+using Bliss.API.SubscriptionManagement.Infrastructure.Persistence.EFC.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -32,25 +41,23 @@ using NRG3.Bliss.API.Shared.Infrastructure.Interfaces.ASP.Configuration;
 using NRG3.Bliss.API.Shared.Infrastructure.Persistence.EFC.Configuration;
 using NRG3.Bliss.API.Shared.Infrastructure.Persistence.EFC.Repositories;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración de servicios (incluso para CORS, bases de datos, etc.)
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()));
 
-// Add CORS Policy
+// Configurar CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllPolicy",
-        policy => 
-            policy.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+    options.AddPolicy("AllowAllPolicy", policy =>
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 });
 
-// Add Database Connection
+// Configurar base de datos (MySQL)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 if (connectionString is null)
     throw new Exception("Connection string is null.");
 
@@ -65,9 +72,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseMySQL(connectionString);
 });
 
+// Registra los repositorios con DI
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+// Registra los servicios y controladores
+builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
+builder.Services.AddScoped<ISubscriptionQueryService, SubscriptionQueryService>();
 
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1",
@@ -79,13 +96,13 @@ builder.Services.AddSwaggerGen(options =>
             TermsOfService = new Uri("https://nrg3-appweb.github.io/Landing-Page/"),
             Contact = new OpenApiContact
             {
-                Name   = "NRG3",
+                Name = "NRG3",
                 Email = "contact@nrg3.com"
             },
             License = new OpenApiLicense
             {
                 Name = "Apache 2.0",
-                Url  = new Uri("https://www.apache.org/licenses/LICENSE-2.0.html")
+                Url = new Uri("https://www.apache.org/licenses/LICENSE-2.0.html")
             }
         });
     options.EnableAnnotations();
@@ -104,6 +121,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<ISpecialistRepository, SpecialistRepository>();
 builder.Services.AddScoped<IServiceCommandService, ServiceCommandService>();
 builder.Services.AddScoped<IServiceQueryService, ServiceQueryService>();
 builder.Services.AddScoped<ICategoryCommandService, CategoryCommandService>();
@@ -127,30 +145,32 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewCommandService, ReviewCommandService>();
 builder.Services.AddScoped<IReviewQueryService, ReviewQueryService>();
 
+// Promotion BC
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IPromotionCommandService, PromotionCommandService>();
+builder.Services.AddScoped<IPromotionQueryService, PromotionQueryService>();
+
 var app = builder.Build();
 
-// Verify Database Objects are Created
+// Verificar si la base de datos existe y crearla si es necesario
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
+    context.AddCategory();
+
 }
 
-// Configure the HTTP request pipeline.
+// Configurar el pipeline de HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    
 }
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
 app.UseCors("AllowAllPolicy");
-
 app.UseHttpsRedirection();
-
 app.MapControllers();
-
 app.Run();
