@@ -18,32 +18,33 @@ namespace NRG3.Bliss.API.AppointmentManagement.Domain.Model.Aggregates;
 public partial class Appointment
 {
     public int Id { get; }
-    
+
     public int UserId { get; internal set; }
     public User User { get; internal set; }
-    
+
     //TODO: Remove Company from class (Astonitas)
     public int CompanyId { get; set; }
     public Company Company { get; internal set; }
-    
+
     public int ServiceId { get; set; }
     public Service Service { get; internal set; }
-    
+
     //TODO: Remove RegisterAt from class (Astonitas)
     public DateTime RegisterAt { get; internal set; }
-    
+
     //TODO: Change attribute type to enum (Astonitas)
     public string Status { get; set; }
     public DateTime ReservationDate { get; set; }
-    
+
     //TODO: Change attribute type to DateTime or Time (Astonitas)
     public string ReservationStartTime { get; set; }
-    
+
     public string Requirements { get; set; }
+    public string Specialist { get; set; }
 
     public Appointment()
     {
-        
+
     }
 
     public Appointment(CreateAppointmentCommand command)
@@ -55,7 +56,8 @@ public partial class Appointment
         ReservationDate = command.ReservationDate;
         ReservationStartTime = command.ReservationStartTime;
         Requirements = command.Requirements;
+        Specialist = command.Specialist;
     }
-    
-    
+
+
 }

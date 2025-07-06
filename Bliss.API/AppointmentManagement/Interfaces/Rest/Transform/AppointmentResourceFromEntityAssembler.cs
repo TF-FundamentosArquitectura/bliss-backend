@@ -10,7 +10,7 @@ namespace NRG3.Bliss.API.AppointmentManagement.Interfaces.Rest.Transform;
 /// </summary>
 public static class AppointmentResourceFromEntityAssembler
 {
-    
+
     /// <summary>
     /// Assembles a AppointmentResource from a Appointment entity
     /// </summary>
@@ -24,14 +24,15 @@ public static class AppointmentResourceFromEntityAssembler
     {
         return new AppointmentResource(
             entity.Id,
-            SimplifiedAppointmentUserResourceFromEntityAssembler.ToResourceFromEntity(entity.User), 
+            SimplifiedAppointmentUserResourceFromEntityAssembler.ToResourceFromEntity(entity.User),
             SimplifiedAppointmentServiceResourceFromEntityAssembler.ToResourceFromEntity(entity.Service),
             SimplifiedCompanyResourceFromEntityAssembler.ToResourceFromEntity(entity.Company),
             entity.CreatedDate,
             entity.Status,
             entity.ReservationDate,
             entity.ReservationStartTime,
-            entity.Requirements
+            entity.Requirements,
+            entity.Specialist
         );
     }
 }

@@ -96,6 +96,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.Entity<Appointment>().Property(a => a.ReservationDate).IsRequired();
         builder.Entity<Appointment>().Property(a => a.ReservationStartTime).IsRequired();
         builder.Entity<Appointment>().Property(a => a.Requirements).IsRequired();
+        builder.Entity<Appointment>().Property(a => a.Specialist).IsRequired();
 
         builder.Entity<User>().HasKey(u => u.Id);
         builder.Entity<User>().Property(u => u.Id).IsRequired().ValueGeneratedOnAdd();

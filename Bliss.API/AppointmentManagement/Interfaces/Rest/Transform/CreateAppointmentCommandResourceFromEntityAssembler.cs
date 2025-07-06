@@ -27,7 +27,8 @@ public static class CreateAppointmentCommandResourceFromEntityAssembler
             resource.status,
             resource.date,
             resource.time,
-            resource.requirements
+            resource.requirements,
+            resource.specialist
             );
     }
 }

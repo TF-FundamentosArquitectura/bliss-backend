@@ -27,4 +27,14 @@
 /// <param name="Requirements">
 /// The requirements for the appointment
 /// </param>
-public record CreateAppointmentCommand( int UserId, int CompanyId, int ServiceId,DateTime ReservedAt, string Status, DateTime ReservationDate, string ReservationStartTime, string Requirements);
+public record CreateAppointmentCommand(
+    int UserId,
+    int CompanyId,
+    int ServiceId,
+    DateTime ReservedAt,
+    string Status,
+    DateTime ReservationDate,
+    string ReservationStartTime,
+    string Requirements,
+    string Specialist
+);

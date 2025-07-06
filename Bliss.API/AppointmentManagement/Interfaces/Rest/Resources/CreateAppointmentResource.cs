@@ -30,10 +30,11 @@
 public record CreateAppointmentResource(
     int userId,
     int serviceId,
-    int companyId, 
+    int companyId,
     DateTime reservationDate,
-    string status, 
-    DateTime date, 
+    string status,
+    DateTime date,
     string time,
-    string requirements
+    string requirements,
+    string specialist
     );
