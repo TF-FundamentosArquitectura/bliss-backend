@@ -12,6 +12,8 @@ public interface ICompanyRepository : IBaseRepository<Company>
      * </summary>
      * <param name="name">The company name</param>
      * <returns>The list of companies</returns>
+
      */
     Task<IEnumerable<Company>> FindCompaniesByCompanyName(string name);
+    Task<Company> FindCompanyByemail(string email);
 }

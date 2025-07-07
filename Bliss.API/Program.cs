@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Text;
 using Bliss.API.Promotions.Application.Internal.CommandServices;
 using Bliss.API.Promotions.Application.Internal.QueryServices;
@@ -20,6 +21,7 @@ using NRG3.Bliss.API.AppointmentManagement.Infrastructure.Persistence.EFC.Reposi
 using NRG3.Bliss.API.IAM.Application.Internal.CommandServices;
 using NRG3.Bliss.API.IAM.Application.Internal.OutboundServices;
 using NRG3.Bliss.API.IAM.Application.Internal.QueryServices;
+using NRG3.Bliss.API.IAM.Domain.Model.Queries;
 using NRG3.Bliss.API.IAM.Domain.Services;
 using NRG3.Bliss.API.IAM.Infrastructure.Hashing.BCrypt.Services;
 using NRG3.Bliss.API.IAM.Infrastructure.Persistence.EFC.Repositories;
@@ -83,7 +85,7 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 // Registra los servicios y controladores
 builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
 builder.Services.AddScoped<ISubscriptionQueryService, SubscriptionQueryService>();
-
+builder.Services.AddSingleton<Dictionary<string, List<WebSocket>>>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -167,10 +169,85 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
+app.Map("/ws", async context =>
+{
+    if (!context.WebSockets.IsWebSocketRequest)
+    {
+        context.Response.StatusCode = 400;
+        return;
+    }
+
+    var token = context.Request.Query["access_token"].ToString();
+
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsync("Missing access_token");
+        return;
+    }
+
+    var tokenService = context.RequestServices.GetRequiredService<ITokenService>();
+    var userservice = context.RequestServices.GetRequiredService<IUserQueryService>();
+    // Validar el token (firma, expiración)
+    var userId = await tokenService.ValidateToken(token);
+    if (userId == null)
+    {
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsync("Invalid token");
+        return;
+    }
+
+    var user = await userservice.Handle(new GetUserByIdQuery(userId.Value));
+    // Extraer el correo desde el token
+    var email = user.Email;
+    if (string.IsNullOrWhiteSpace(email))
+    {
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsync("Invalid token (no email)");
+        return;
+    }
+
+    var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+    var welcomeMessage = Encoding.UTF8.GetBytes($"{{\"content\":\"Bienvenido {email}!\"}}");
+    await webSocket.SendAsync(
+        new ArraySegment<byte>(welcomeMessage, 0, welcomeMessage.Length),
+        WebSocketMessageType.Text,
+        true,
+        CancellationToken.None
+    );
+    var socketsDictionary = context.RequestServices.GetRequiredService<Dictionary<string, List<WebSocket>>>();
+    lock (socketsDictionary)
+    {
+        if (!socketsDictionary.ContainsKey(email))
+            socketsDictionary[email] = new List<WebSocket>();
+        socketsDictionary[email].Add(webSocket);
+        Console.WriteLine($"WebSocket connection established for {email}. Total connections: {socketsDictionary[email].Count}");
+    }
+
+    var buffer = new byte[1024 * 4];
+
+    while (webSocket.State == WebSocketState.Open)
+    {
+        var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+        if (result.MessageType == WebSocketMessageType.Close)
+        {
+            lock (socketsDictionary)
+            {
+                socketsDictionary[email].Remove(webSocket);
+                if (socketsDictionary[email].Count == 0)
+                    socketsDictionary.Remove(email);
+            }
+            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+        }
+    }
+});
+
 
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowAllPolicy");
 app.UseHttpsRedirection();
 app.MapControllers();
+app.UseWebSockets();
 app.Run();
+

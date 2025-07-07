@@ -16,7 +16,7 @@ public interface ITokenService
     /// The generated token
     /// </returns>
     string GenerateToken(User user);
-    
+
     /// <summary>
     /// Validates the token
     /// </summary>
@@ -27,4 +27,5 @@ public interface ITokenService
     /// The user id if the token is valid, null otherwise
     /// </returns>  
     Task<int?> ValidateToken(string token);
+    string? ExtractEmailFromToken(string token);
 }

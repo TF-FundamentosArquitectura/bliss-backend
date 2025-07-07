@@ -19,7 +19,24 @@ namespace NRG3.Bliss.API.IAM.Infrastructure.Tokens.Services;
 public class TokenService(IOptions<TokenSettings> tokenSettings) : ITokenService
 {
     private readonly TokenSettings _tokenSettings = tokenSettings.Value;
-    
+
+    public string? ExtractEmailFromToken(string token)
+    {
+        if (string.IsNullOrEmpty(token)) return null;
+
+        var handler = new JsonWebTokenHandler();
+        var jwtToken = handler.ReadJsonWebToken(token);
+        if (jwtToken == null) return null;
+
+        var nameClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+        if (nameClaim == null) return null;
+
+        var parts = nameClaim.Value.Split(',');
+        if (parts.Length < 2) return null;
+
+        return parts[1].Trim();
+    }
+
     // <inheritdoc />
     public string GenerateToken(User user)
     {

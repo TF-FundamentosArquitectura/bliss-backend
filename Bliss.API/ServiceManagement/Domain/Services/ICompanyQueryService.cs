@@ -23,4 +23,5 @@ public interface ICompanyQueryService
      * <returns>The company</returns>
      */
     Task<Company?> Handle(GetCompanyByIdQuery query);
+    Task<Company?> Handle(string email);
 }

@@ -23,5 +23,10 @@ public class CompanyQueryService(ICompanyRepository companyRepository) : ICompan
         }
         return company;
     }
-    
+
+    public async Task<Company?> Handle(string email)
+    {
+        return await companyRepository.FindCompanyByemail(email) ??
+            throw new InvalidOperationException("The company does not exist.");
+    }
 }

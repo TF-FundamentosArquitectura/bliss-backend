@@ -9,9 +9,15 @@ namespace NRG3.Bliss.API.ServiceManagement.Infrastructure.Persistence.EFC.Reposi
 public class CompanyRepository(AppDbContext context) : BaseRepository<Company>(context), ICompanyRepository
 {
     /// <inheritdoc />
-    public async Task<IEnumerable<Company>> FindCompaniesByCompanyName(string name)=> 
+    public async Task<IEnumerable<Company>> FindCompaniesByCompanyName(string name) =>
         await Context.Set<Company>()
         .Where(c => c.Name == name)
         .ToListAsync();
-    
+
+    public async Task<Company> FindCompanyByemail(string email)
+    {
+        return await Context.Set<Company>()
+        .FirstOrDefaultAsync(c => c.Email == email)
+            ?? throw new KeyNotFoundException($"Company with email {email} not found.");
+    }
 }
